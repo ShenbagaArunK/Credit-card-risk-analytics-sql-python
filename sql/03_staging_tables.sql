@@ -28,3 +28,20 @@ create table staging.pros_transaction(
 -- creating identity table
 
 drop table if exists staging.pros_identity;
+
+create table staging.pros_identity(
+	transaction_id bigint primary key,
+	device_type		varchar(20),
+	device_info		varchar(100),
+	id_30			varchar(50),
+	id_31			varchar(100),
+	id_33			varchar(20)
+);
+
+-------------------------
+-- verify the tables
+
+select table_schema, table_name,
+		(select count(*) from information_schema.columns where table_schema = t.table_schema and table_name = t.table_name)
+from 	information_schema.tables t
+where table_schema = 'staging';
