@@ -45,9 +45,40 @@ on fraud_dw.fact_transactions(device_id);
 
 -----------------------------------------------
 
+-- Checks
+
+-- All tables in fraud_dw with their column counts
+SELECT 
+    table_name,
+    (SELECT COUNT(*) FROM information_schema.columns 
+     WHERE table_schema = 'fraud_dw' AND table_name = t.table_name) AS columns
+FROM information_schema.tables t
+WHERE table_schema = 'fraud_dw'
+ORDER BY 
+    CASE WHEN table_name = 'fact_transactions' THEN 2 ELSE 1 END,
+    table_name;
 
 
 
 
+-- All foreign key relationships
+SELECT
+    tc.table_name AS table_name,
+    kcu.column_name AS column_name,
+    ccu.table_name AS references_table,
+    ccu.column_name AS references_column
+FROM information_schema.table_constraints tc
+JOIN information_schema.key_column_usage kcu 
+    ON tc.constraint_name = kcu.constraint_name
+JOIN information_schema.constraint_column_usage ccu 
+    ON ccu.constraint_name = tc.constraint_name
+WHERE tc.constraint_type = 'FOREIGN KEY'
+  AND tc.table_schema = 'fraud_dw'
+ORDER BY tc.table_name, kcu.column_name;
 
 
+
+-- All indexes on fact_transactions
+SELECT indexname FROM pg_indexes 
+WHERE schemaname = 'fraud_dw' AND tablename = 'fact_transactions'
+ORDER BY indexname;
