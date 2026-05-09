@@ -76,6 +76,101 @@ select * from fraud_dw.dim_product;
 
 -------------------------------------------------------------
 
+-- Dimensio Card
+
+drop table if exists fraud_dw.dim_card cascade;
+
+create table fraud_dw.dim_card(
+	card_id		serial primary key,
+	card1 		integer,
+	card2		numeric,
+	card3		numeric,
+	card4		varchar(25),
+	card5		numeric,
+	card6		varchar(10),
+	card_network	varchar(25),
+	card_type		varchar(10)
+);
+
+-- Indexong the card table for ETL process
+create unique index idx_dim_card_natural
+	on fraud_dw.dim_card(
+		coalesce(card1, -1),
+		coalesce(card2, -1),
+		coalesce(card3, -1),
+		coalesce(card4, ''),
+		coalesce(card5, -1),
+		coalesce(card6, '')
+	);
+
+
+select * from fraud_dw.dim_card;
+---------------------------------------------------------------------
+
+
+-- Diensions Device
+
+drop table if exists fraud_dw.dim_device cascade;
+
+create table fraud_dw.dim_device (
+	device_id			serial primary key,
+	device_type			varchar(20),
+	device_info			varchar(200),
+	operating_system	varchar(50),
+	browser				varchar(100),
+	screen_resolution	varchar(20)
+);
+
+create unique index idx_dim_device_natural
+	on fraud_dw.dim_device(
+		coalesce(device_type, ''),
+		coalesce(device_info, ''),
+		coalesce(operating_system, ''),
+		coalesce(browser, ''),
+		coalesce(screen_resolution, '')
+	);
+
+
+----------------------------------------------------------------
+
+-- Dmensional Geography
+
+drop table if exists fraud_dw.dim_geography cascade;
+
+create table fraud_dw.dim_geography(
+	geography_id 	serial primary key,
+	addr1			numeric,
+	addr2			numeric,
+	region_label	varchar(50),
+	country_label	varchar(50)
+);
+
+create unique index idx_dim_geography_natural
+	on fraud_dw.dim_geography(
+		coalesce(addr1, -1),
+		coalesce(addr2, -1)
+	);
+
+------------------------------------------------------------------
+
+drop table if exists fraud_dw.dim_email_domain cascade;
+
+create table fraud_dw.dim_email_domain(
+	email_domain_id		serial primary key,
+	email_domain		varchar(50) unique,
+	domain_category		varchar(30)
+);
+-----------------------------------------------------------------
+
+select table_name,
+		(select count(*) from information_schema.columns
+		where table_schema = 'fraud_dw' and table_name = t.table_name) as columns_count
+
+from information_schema.tables t
+where table_schema = 'fraud_dw'
+order by table_name
+
+----------------------------------------------------------------
 
 
 
