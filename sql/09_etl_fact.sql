@@ -99,11 +99,11 @@ left join fraud_dw.dim_geography dg
 
 -- Purschase email
 left join fraud_dw.dim_email_domain de_p
-	on de_p.email_domain = lower(trim(t.p_emaildomain))
+	on de_p.email_domain = coalesce(lower(trim(t.p_emaildomain)), 'unknown')
 
 -- Recipient email
 left join fraud_dw.dim_email_domain de_r
-	on de_r.email_domain = lower(trim(t.r_emaildomain))
+	on de_r.email_domain = coalesce(lower(trim(t.r_emaildomain)), 'unknown')
 
 
 

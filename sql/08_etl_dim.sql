@@ -147,6 +147,8 @@ ON CONFLICT (email_domain) DO NOTHING;
 select count(*) as unique_domains 
 from fraud_dw.dim_email_domain;
 
+select * from fraud_dw.dim_email_domain where email_domain_id = 55;
+
 SELECT domain_category, COUNT(*) AS domain_count
 FROM fraud_dw.dim_email_domain
 GROUP BY domain_category
