@@ -105,6 +105,33 @@ left join fraud_dw.dim_email_domain de_p
 left join fraud_dw.dim_email_domain de_r
 	on de_r.email_domain = coalesce(lower(trim(t.r_emaildomain)), 'unknown')
 
+----------------------------------------------------------------------------------
+-- verifying
+
+-- row counts
+select 
+	(select count(*) from staging.pros_transaction) as staging_count,
+	(select count(*) from fraud_dw.fact_transactions) as fact_count,
+	(select count(*) from staging.pros_transaction) - (select count(*) from fraud_dw.fact_transactions) as differnece
+	
+-- difference is 0
+
+--------------------------------------
+
+select is_fraud,
+		count(*) as cnt,
+		round(100 * count(*)/sum(count(*)) over (),2) as pct
+from fraud_dw.fact_transactions
+group by is_fraud
+order by is_fraud desc;
+
+
+
+
+
+
+
+
 
 
 
