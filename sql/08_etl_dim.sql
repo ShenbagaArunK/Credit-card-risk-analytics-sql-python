@@ -50,7 +50,7 @@ select distinct
 	coalesce(lower(trim(id_31)), 'unknown') as browser,
 	coalesce(trim(id_33), 'unknown') 		as screen_resolution
 from staging.pros_identity;
------------------------------------------------------------------------------
+---------------------------------------------------------
 -- to avoid emty device_id -- filling it with unknown
 insert into fraud_dw.dim_device(
 	device_type,device_info, operating_system, browser,screen_resolution
@@ -61,6 +61,7 @@ insert into fraud_dw.dim_device(
 -- verification
 
 SELECT COUNT(*) AS unique_devices FROM fraud_dw.dim_device;
+select * from fraud_dw.dim_device;
 
 select device_type, count(*) as device_count
 from fraud_dw.dim_device
@@ -95,9 +96,59 @@ order by 2 desc
 limit 10;
 
 ----------------------------------------------------------------------
+--ETL dimensional email_domain
+insert into fraud_dw.dim_email_domain(email_domain,domain_category)
+select distinct	lower(trim(email_domain)) as email_domain,
+	case
+		-- Freee mails 
+		when lower(trim(email_domain)) in(
+			'gmail.com', 'yahoo.com', 'hotmail.com', 'aol.com', 
+            'outlook.com', 'live.com', 'icloud.com', 'me.com', 
+            'mac.com', 'msn.com', 'ymail.com', 'rocketmail.com'
+			) then 'free_webmail'
+		-- Anonymous mails
+		when lower(trim(email_domain)) in(
+			'protonmail.com','mail.com','anonymous.com'
+		) then 'anonymous'
 
+		-- ISP providers
+		when lower(trim(email_domain)) like '%comcast%'
+		or lower(trim(email_domain)) like '%verizon%'
+		OR LOWER(TRIM(email_domain)) LIKE '%att.net%'
+         OR LOWER(TRIM(email_domain)) LIKE '%sbcglobal%'
+         OR LOWER(TRIM(email_domain)) LIKE '%charter%'
+		 then 'isp_provider'
+		 -- Apple ecosystem
+		 when lower(trim(email_domain)) like '%apple%'
+		 then 'apple_ecosystem'
+		 -- Microsoft ecosystems
+		 when lower(trim(email_domain)) like '%microsoft%'
+		 then 'microsoft_ecosystem'
+		 -- Eductaion .edu
+		 when lower(trim(email_domain)) like '%.edu'
+		 then 'education'
 
+		 else 'corporate_or_other'
+		end as domain_category
+from (
+	select p_emaildomain as email_domain from staging.pros_transaction
+	union
+	select r_emaildomain as email_domain from staging.pros_transaction
+	) all_emails
+where email_domain is not null
+		and trim(email_domain) <> '';
+---------------------------------
+-- Add an explicit "unknown" row for nulls
+INSERT INTO fraud_dw.dim_email_domain (email_domain, domain_category)
+VALUES ('unknown', 'unknown')
+ON CONFLICT (email_domain) DO NOTHING;
+--------------------------------------------------
+-- verification
+select count(*) as unique_domains 
+from fraud_dw.dim_email_domain;
 
-
-
+SELECT domain_category, COUNT(*) AS domain_count
+FROM fraud_dw.dim_email_domain
+GROUP BY domain_category
+ORDER BY domain_count DESC;
 
