@@ -152,3 +152,20 @@ FROM fraud_dw.dim_email_domain
 GROUP BY domain_category
 ORDER BY domain_count DESC;
 
+--------------------------------------------------------------
+
+-- checking the count of all dim tables
+
+
+SELECT 'dim_date'         AS dimension, COUNT(*) AS rows FROM fraud_dw.dim_date
+UNION ALL
+SELECT 'dim_product',     COUNT(*) FROM fraud_dw.dim_product
+UNION ALL
+SELECT 'dim_card',        COUNT(*) FROM fraud_dw.dim_card
+UNION ALL
+SELECT 'dim_device',      COUNT(*) FROM fraud_dw.dim_device
+UNION ALL
+SELECT 'dim_geography',   COUNT(*) FROM fraud_dw.dim_geography
+UNION ALL
+SELECT 'dim_email_domain', COUNT(*) FROM fraud_dw.dim_email_domain
+ORDER BY dimension;
