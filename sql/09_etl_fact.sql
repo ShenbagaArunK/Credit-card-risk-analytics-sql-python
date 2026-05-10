@@ -1,0 +1,1 @@
+-- Insert data into facts table
