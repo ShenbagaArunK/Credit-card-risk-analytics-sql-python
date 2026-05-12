@@ -117,8 +117,7 @@ select
 -- difference is 0
 
 --------------------------------------
-
-
+-- Fraud_rate
 select is_fraud,
 		count(*) as cnt,
 		round(100 * count(*)/sum(count(*)) over (),2) as pct
@@ -127,7 +126,15 @@ group by is_fraud
 order by is_fraud desc;
 
 -----------------------------------------------
+-- chking null ids
+select 
+		count(*) filter (where date_id is null) as null_date_id,
+		count(*) filter (where device_id is null) as null_device_id,
+		count(*) filter (where card_id is null) as null_card_id
+		from fraud_dw.fact_transactions;
 
+--  all are 0 
+-----------------------------------------------
 
 
 
