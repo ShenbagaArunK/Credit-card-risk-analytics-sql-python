@@ -136,7 +136,70 @@ select
 --  all are 0 
 -----------------------------------------------
 
+-- date range match
 
+select min(transaction_dt) as earliest_date,
+		max(transaction_dt) as latest_date
+from 	fraud_dw.fact_transactions;
 
+---------------------------------------------
+-- chking fk reference integrity
+select count(*) as mismatch_card_ids
+from fraud_dw.fact_transactions f
+left join fraud_dw.dim_card dc
+on		f.card_id = dc.card_id
+where dc.card_id is null;
+-- returned 0
+----------------------------------------------
+-- Chk coverage matches the expected 
+select device_type,
+		count(*) as cnt,
+		round(100* count(*)/sum(count(*)) over (),2) as pct
+from 	fraud_dw.fact_transactions f
+left join 	fraud_dw.dim_device dd
+on 			f.device_id = dd.device_id
+group by dd.device_type
+order by cnt desc;
+-- unknown - 76,desktop - 14,mobile - 10
+-----------------------------------------------------
+-- fraud_rate by card network
+select card_network,
+		count(*) as tot_cnt,
+		count(*) filter (where is_fraud is True) as fraud_cnt,
+		round(100* count(*) filter (where is_fraud is True)/count(*),2) as fraud_rate_pct
+from 	fraud_dw.fact_transactions f
+left join 	fraud_dw.dim_card dc
+on 			f.card_id = dc.card_id
+group by dc.card_network
+order by fraud_rate_pct desc;
+-----------------------------------------------------
+-- Fraud rate by hour of day (preview of Phase 2)
+SELECT 
+    hour_of_day,
+    COUNT(*)                                           AS txn_count,
+    COUNT(*) FILTER (WHERE is_fraud)                   AS fraud_count,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE is_fraud) / COUNT(*), 2) AS fraud_rate_pct
+FROM fraud_dw.fact_transactions
+GROUP BY hour_of_day
+ORDER BY hour_of_day;
+-------------------------------------------------
+-- Fraud rate by product category
+SELECT 
+    p.product_category,
+    COUNT(*)                                           AS txn_count,
+    COUNT(*) FILTER (WHERE f.is_fraud)                 AS fraud_count,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE f.is_fraud) / COUNT(*), 2) AS fraud_rate_pct
+FROM fraud_dw.fact_transactions f
+JOIN fraud_dw.dim_product p ON f.product_id = p.product_id
+GROUP BY p.product_category
+ORDER BY fraud_rate_pct DESC;
+-------------------------------------------------
+-- Optional if wanted we can drop the staging schema nd tables 
+
+-- Optional cleanup
+DROP TABLE staging.stg_transaction;
+DROP TABLE staging.stg_identity;
+DROP SCHEMA staging;
+---------------------------------------------------
 
 
