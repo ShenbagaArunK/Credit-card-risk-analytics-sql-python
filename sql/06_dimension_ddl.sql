@@ -67,7 +67,7 @@ Insert into fraud_dw.dim_product (product_cd,product_category) values
 	('W', 'Web Purchase'),
 	('H', 'Hotel/Travel'),
 	('C', 'Card-Not-Present'),
-	('S', 'Subscritption'),
+	('S', 'Subscription'),
 	('R', 'Retail');
 
 -----------------------------------
