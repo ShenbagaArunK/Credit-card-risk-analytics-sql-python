@@ -118,6 +118,7 @@ select
 
 --------------------------------------
 
+
 select is_fraud,
 		count(*) as cnt,
 		round(100 * count(*)/sum(count(*)) over (),2) as pct
@@ -125,12 +126,7 @@ from fraud_dw.fact_transactions
 group by is_fraud
 order by is_fraud desc;
 
-
-
-
-
-
-
+-----------------------------------------------
 
 
 
