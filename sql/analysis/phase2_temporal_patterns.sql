@@ -6,7 +6,7 @@ select hour_of_day,
 		count(*) 							as txn_count,
 		count(*) filter (where is_fraud)	as fraud_count,
 		round(100 * count(*) filter (where is_fraud)
-				/ count(*),2)				as frayd_rate_pct,
+				/ count(*),2)				as fraud_rate_pct,
 		round(avg(transaction_amt),2)		as avg_amount
 from fraud_dw.fact_transactions
 group by hour_of_day
@@ -92,7 +92,7 @@ JOIN fraud_dw.dim_product p USING (product_id)
 GROUP BY 1, p.product_category
 ORDER BY p.product_category, time_bucket;
 
-
+------------------------------------------------------------------------------------
 
 
 
