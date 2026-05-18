@@ -127,7 +127,7 @@ order by CASE WHEN p.product_category IS NULL THEN 2 ELSE 1 END,
 --------------------------------------------------------------------------		
 
 
-
+select * from fraud_dw.dim_product;
 
 
 
