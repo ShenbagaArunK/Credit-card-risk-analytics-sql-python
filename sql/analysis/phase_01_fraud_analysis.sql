@@ -16,8 +16,6 @@ select
 				/ sum(transaction_amt),2)						as fraud_rate_amount_pct
 from fraud_dw.fact_transactions;
 
--- findings -- 
-
 
 -----------------------------------------------------------------------------
 
@@ -38,8 +36,6 @@ on f.product_id = p.product_id
 group by p.product_category
 order by fraud_rate_pct desc;
 
--- findings -- 
-
 
 ------------------------------------------------------------------
 
@@ -59,7 +55,6 @@ join fraud_dw.dim_card c using (card_id)
 group by c.card_network
 order by txn_count desc;
 
--- findings -- 
 
 ---------------------------------------------------------------------
 
@@ -78,8 +73,7 @@ from fraud_dw.fact_transactions f
 join fraud_dw.dim_card c using (card_id)
 group by c.card_type
 order by txn_count desc;
-
--- findings -- 
+ 
 
 --------------------------------------------------------------------------
 
@@ -103,8 +97,6 @@ select
 from 	fraud_dw.fact_transactions
 group by is_fraud
 order by is_fraud;
-
--- findings -- 
 
 --------------------------------------------------------------------------		
 -- 06. checking multiple aggregation levels of feaud_rate
@@ -131,8 +123,6 @@ order by CASE WHEN p.product_category IS NULL THEN 2 ELSE 1 END,
 					CASE WHEN c.card_type IS NULL THEN 2 ELSE 1 END,
 					c.card_type;
 
-
--- findings -- 
 
 --------------------------------------------------------------------------		
 
