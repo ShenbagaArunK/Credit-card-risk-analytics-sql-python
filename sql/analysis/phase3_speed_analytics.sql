@@ -154,20 +154,68 @@ select
 from velocity
 order by txns_last_1hr desc, amt_last_1hr desc
 limit 20;
+-------------------------------------------------------------------------
+
+
+-- hypothesis Test -- velocity does not relate to increase the fraud rate
+
+-- How many transactions does each card_id carry?
+SELECT 
+    transaction_count_bucket,
+    COUNT(*) AS num_cards
+FROM (
+    SELECT 
+        card_id,
+        CASE 
+            WHEN COUNT(*) = 1 THEN '1 txn'
+            WHEN COUNT(*) BETWEEN 2 AND 10 THEN '2-10'
+            WHEN COUNT(*) BETWEEN 11 AND 50 THEN '11-50'
+            WHEN COUNT(*) BETWEEN 51 AND 200 THEN '51-200'
+            ELSE '200+'
+        END AS transaction_count_bucket
+    FROM fraud_dw.fact_transactions
+    GROUP BY card_id
+) t
+GROUP BY transaction_count_bucket
+ORDER BY MIN(
+    CASE transaction_count_bucket
+        WHEN '1 txn' THEN 1 WHEN '2-10' THEN 2 
+        WHEN '11-50' THEN 3 WHEN '51-200' THEN 4 ELSE 5 END
+);
 
 
 
+-- The busiest card_ids — how many transactions?
+SELECT card_id, COUNT(*) AS txn_count
+FROM fraud_dw.fact_transactions
+GROUP BY card_id
+ORDER BY txn_count DESC
+LIMIT 10;
 
 
 
+-- from this, In this dataset card_id deos not indicating one card but a cluster of cards based on banks or region.
 
 
+-- per-card transaction volume vs fraud rate
+-- Shows that high-volume card_ids are LOW fraud (they're popular legit clusters)
 
-
-
-
-
-
-
-
-
+SELECT 
+    CASE 
+        WHEN card_txn_count BETWEEN 1 AND 10    THEN '1-10'
+        WHEN card_txn_count BETWEEN 11 AND 50   THEN '11-50'
+        WHEN card_txn_count BETWEEN 51 AND 200  THEN '51-200'
+        ELSE '200+'
+    END                                                AS card_volume_tier,
+    COUNT(*)                                           AS txn_count,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE is_fraud) 
+                / COUNT(*), 3)                         AS fraud_rate_pct
+FROM fraud_dw.fact_transactions f
+JOIN (
+    SELECT card_id, COUNT(*) AS card_txn_count
+    FROM fraud_dw.fact_transactions
+    GROUP BY card_id
+) cv USING (card_id)
+GROUP BY card_volume_tier
+ORDER BY MIN(card_txn_count);
+--------------------------------------------------------
