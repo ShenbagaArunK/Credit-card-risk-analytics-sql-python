@@ -17,8 +17,7 @@ select
 		round(min(transaction_amt),2) 	as min_amt,
 		round(max(transaction_amt),2)	as max_amt,
 		count(*) filter(where is_fraud)	as fraud_count,
-		round(100 * count(*)
-			filter (where is_fraud)/count(*),2)		as fraud_rate_pct
+		round(100.0 * count(*)filter (where is_fraud)/count(*),2)		as fraud_rate_pct
 from amt_buckets
 group by amt_quintile
 order by amt_quintile;
