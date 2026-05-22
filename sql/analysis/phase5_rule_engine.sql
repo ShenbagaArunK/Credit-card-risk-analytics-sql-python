@@ -83,13 +83,75 @@ group by is_fraud
 order by is_fraud;
 -----------------------------------------
 
--- 
+-- Setting up confusion matrix with threshold
 
+with evaluation as (
+	select 
+		is_fraud,
+		(risk_score >= 18) as flagged
+	from fraud_dw.v_scored_transactions
+)
+select
+	count(*) filter (where flagged and is_fraud) 			as true_positives,
+	count(*) filter (where flagged and not is_fraud)		as flase_positives,
+	count(*) filter (where not flagged and is_fraud)		as flase_negatives,
+	count(*) filter (where not flagged and not is_fraud)	as true_negative,
 
+	-- How many were actullay fraud out of flagged
+	round(100.0 * count(*) filter (where flagged and is_fraud)::numeric
+		/ nullif(count(*) filter (where flagged),0),2)	as precesion_pct,
+		
+	-- recall : of all fraud hw manu did we got right
+	round(100.0 * count(*) filter (where flagged and is_fraud)::numeric
+		/ nullif(count(*) filter (where is_fraud),0),2)		as recall_pct
 
+from evaluation;
+--------------------------------------------------------------------------
+	
+-- F1 score
 
+with thresholds as (
+select generate_series(0,60,2) as threshold
+),
+metrics as (
+	select t.threshold,
+	count(*) filter (where s.risk_score >= threshold and s.is_fraud) 	as tp,
+	count(*) filter (where s.risk_score >= threshold and not s.is_fraud) 	as fp,
+	count(*) filter (where is_fraud)										as tot_fraud
+from thresholds t
+	cross join fraud_dw.v_scored_transactions s
+group by t.threshold,
+	(select count(*) filter (where is_fraud) from fraud_dw.v_scored_transactions)		
+)
+select 
+	threshold,
+	tp,
+	fp,
+	round(100.0 * tp::numeric / nullif(tp + fp,0),2) as precesion_pct,
+	round(100.0 * tp::numeric / nullif(tot_fraud,0),2) as recall_pct,
+	-- F1 score
+	round(2.0 * (tp::numeric/nullif(tp+fp,0)) * (tp::numeric / NULLIF(tot_fraud, 0))
+		/NULLIF((tp::numeric / NULLIF(tp + fp, 0)) + (tp::numeric / NULLIF(tot_fraud, 0)), 0) * 100, 2) as f1_score
+from metrics
+order by threshold;
 
+-------------------------------------------------------------------------------------------------------
 
+-- Cost Benefit analysis
+
+with evaluation as (
+	select 
+		is_fraud,
+		transaction_amt,
+		(risk_score >= 18) as flagged
+	from fraud_dw.v_scored_transactions
+)
+select
+	-- Fraud Caught -- led to saving money
+	round(sum(transaction_amt) filter (where flagged and is_fraud,2) as fraud_value_caught,
+	-- Fraud missed - led to losing money
+	round(sum(transaction_amt) filter (where not flagged and is_fraud),2) as fraud_value_missed,
+	-- Predicted wrong 
 
 
 
