@@ -148,10 +148,15 @@ with evaluation as (
 )
 select
 	-- Fraud Caught -- led to saving money
-	round(sum(transaction_amt) filter (where flagged and is_fraud,2) as fraud_value_caught,
+	round(sum(transaction_amt) filter (where flagged and is_fraud),2) as fraud_value_caught,
 	-- Fraud missed - led to losing money
 	round(sum(transaction_amt) filter (where not flagged and is_fraud),2) as fraud_value_missed,
-	-- Predicted wrong 
+	-- Predicted wrong (False positives x $5(assumption))
+	(count(*) filter (where flagged and not is_fraud) * 5)					as friction_cost,
+	-- Net benefit
+	round(sum(transaction_amt) filter (where flagged and is_fraud)
+		- count(*) filter (where flagged and not is_fraud)*5,2)				as net_benefit
+from evaluation;
 
 
 
