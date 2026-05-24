@@ -24,6 +24,8 @@ pre-processing, database connectivity, and visualization — mirroring how produ
 analytics teams separate transformation logic from presentation.
 
 ---
+![Fraud rate by hour and day](visuals/phase2_q3_heatmap.png)
+---
 
 ## Key Findings
 
@@ -43,9 +45,8 @@ analytics teams separate transformation logic from presentation.
   than individual cards. This is documented as a finding, not hidden.
 
 ---
-![Fraud rate by hour and day](visuals/phase2_q3_heatmap.png)
 ![Risk multiples by segment](visuals/phase4_q2q3_risk_multiples.png)
-![Detection engine confusion matrix](visuals/phase5_confusion_matrix.png)
+---
 
 ## Detection Engine Performance
 
@@ -70,6 +71,8 @@ from the F1-optimal threshold** — the engine should flag aggressively for huma
 rather than auto-block. Broader coverage rules were tested and rejected because they
 *lowered* net benefit despite raising recall (see Phase 5).
 
+---
+![Detection engine confusion matrix](visuals/phase5_confusion_matrix.png)
 ---
 
 ## Tech Stack
