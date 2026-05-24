@@ -1,5 +1,8 @@
 --- Phase 05: Rule based fraud Detection Engine
 -- rules derived from pase 4 discovered segments
+
+Drop view if exists fraud_dw.v_scored_transactions;
+
 CREATE OR REPLACE VIEW fraud_dw.v_scored_transactions AS
 with enriched as (
 	select
@@ -57,6 +60,7 @@ scored as (
 	and domain_category = 'free_webmail'
 	and amt_quintile in (1,5)
 	then 8 else 0 end as r6
+
 from enriched
 )
 select 
