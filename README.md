@@ -43,6 +43,9 @@ analytics teams separate transformation logic from presentation.
   than individual cards. This is documented as a finding, not hidden.
 
 ---
+![Fraud rate by hour and day](visuals/phase2_q3_heatmap.png)
+![Risk multiples by segment](visuals/phase4_q2q3_risk_multiples.png)
+![Detection engine confusion matrix](visuals/phase5_confusion_matrix.png)
 
 ## Detection Engine Performance
 
