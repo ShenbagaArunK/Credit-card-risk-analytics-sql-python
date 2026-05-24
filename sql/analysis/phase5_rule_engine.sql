@@ -162,7 +162,3 @@ select
 		- count(*) filter (where flagged and not is_fraud)*5,2)				as net_benefit
 from evaluation;
 
-
-
-
-	
